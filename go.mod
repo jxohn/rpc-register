@@ -1,4 +1,4 @@
-module github.com/jxohn/id-generate
+module github.com/jxohn/rpc-register
 
 go 1.16
 

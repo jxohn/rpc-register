@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"log"
-	"math/rand"
+	"strconv"
 	"time"
 
-	"github.com/jxohn/id-generate/consumer"
-	pb "github.com/jxohn/id-generate/proto"
+	"github.com/jxohn/rpc-register/consumer"
+	pb "github.com/jxohn/rpc-register/proto"
 	"google.golang.org/grpc"
 )
 
@@ -18,11 +18,16 @@ func main() {
 	}
 	log.Println(register)
 
-	for i := 0; i < 1000; i++ {
-		intn := rand.Intn(len(register))
-		dial, err := grpc.Dial(register[intn], grpc.WithInsecure(), grpc.WithBlock())
+	for i := 0; i < 10000; i++ {
+		conn, err := consumer.GetConn()
 		if err != nil {
-			log.Fatalf("failed to connect : %+v", err)
+			log.Printf("failed to get conn, %+v\n", err)
+			continue
+		}
+		dial, err := grpc.Dial(conn, grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(500*time.Millisecond))
+		if err != nil {
+			log.Printf("failed to connect : %+v\n", err)
+			continue
 		}
 
 		defer dial.Close()
@@ -32,7 +37,7 @@ func main() {
 		defer cancelFunc()
 
 		ds, err := client.GetIDs(ctx, &pb.GetIDsRequest{
-			Biz: "FuckingBiz",
+			Biz: "FuckingBiz_" + strconv.Itoa(i),
 			Num: 100,
 		})
 
