@@ -58,6 +58,7 @@ NEXT:
 	return result, nil
 }
 
+// GetConn 获取一个连接, 这里应该维护一个连接池, 并且需要有校验连接可用的方法
 func GetConn() (string, error) {
 	children, _, err := zkConn.Children(path)
 	if err != nil {
@@ -65,6 +66,7 @@ func GetConn() (string, error) {
 	}
 
 	result := make([]string, 0)
+	// 这里换成从缓存里面取
 	for i := range children {
 		get, _, err := zkConn.Get(path + "/" + children[i])
 		if err != nil {
@@ -84,6 +86,7 @@ func GetConn() (string, error) {
 		}
 		intn := rand.Intn(len(result))
 		s := result[intn]
+		// 这里可能需要换个验证连接是否可用的方式了, 如果维护连接池的话, 可用读取一个字符
 		_, err := net.DialTimeout("tcp", s, 500*time.Millisecond)
 		if err != nil {
 			log.Println("cant get!!!")
